@@ -19,7 +19,7 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9"
 }
 
-OUTPUT_PATH = "../../data/raw_news/benzinga_news_raw.csv"
+OUTPUT_PATH = "data/raw_news/benzinga_news_raw.csv"
 
 
 # ================================
@@ -119,7 +119,7 @@ def fetch_benzinga_news(page_size=30):
 
     df = pd.DataFrame(rows)
 
-    os.makedirs("../../data/raw_news", exist_ok=True)
+    os.makedirs("data/raw_news", exist_ok=True)
 
     df.to_csv(OUTPUT_PATH, index=False)
 

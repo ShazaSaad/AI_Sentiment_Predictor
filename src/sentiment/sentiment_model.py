@@ -4,8 +4,8 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 import nltk
 
 
-INPUT_PATH = "../../data/processed_news/cleaned_news.csv"
-OUTPUT_PATH = "../../data/sentiment/news_sentiment_scores.csv"
+INPUT_PATH = "data/processed_news/cleaned_news.csv"
+OUTPUT_PATH = "data/sentiment/news_sentiment_scores.csv"
 
 
 def generate_sentiment():
@@ -22,7 +22,7 @@ def generate_sentiment():
         lambda x: sia.polarity_scores(x)["compound"]
     )
 
-    os.makedirs("../../data/sentiment", exist_ok=True)
+    os.makedirs("data/sentiment", exist_ok=True)
 
     df.to_csv(OUTPUT_PATH, index=False)
 

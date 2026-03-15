@@ -3,8 +3,8 @@ import re
 import os
 
 
-INPUT_PATH = "../../data/raw_news/benzinga_news_raw.csv"
-OUTPUT_PATH = "../../data/processed_news/cleaned_news.csv"
+INPUT_PATH = "data/raw_news/benzinga_news_raw.csv"
+OUTPUT_PATH = "data/processed_news/cleaned_news.csv"
 
 
 def clean_text(text):
@@ -37,7 +37,7 @@ def clean_news():
 
     df["clean_text"] = df["full_text"].apply(clean_text)
 
-    os.makedirs("../data/processed_news", exist_ok=True)
+    os.makedirs("data/processed_news", exist_ok=True)
 
     df.to_csv(OUTPUT_PATH, index=False)
 

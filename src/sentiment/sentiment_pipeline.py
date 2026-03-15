@@ -2,8 +2,8 @@ import pandas as pd
 import os
 
 
-INPUT_PATH = "../../data/sentiment/news_sentiment_scores.csv"
-OUTPUT_PATH = "../../data/sentiment/daily_sentiment_scores.csv"
+INPUT_PATH = "data/sentiment/news_sentiment_scores.csv"
+OUTPUT_PATH = "data/sentiment/daily_sentiment_scores.csv"
 
 
 def create_daily_sentiment():
@@ -22,7 +22,7 @@ def create_daily_sentiment():
         .reset_index()
     )
 
-    os.makedirs("../../data/sentiment", exist_ok=True)
+    os.makedirs("data/sentiment", exist_ok=True)
 
     daily_sentiment.to_csv(OUTPUT_PATH, index=False)
 
