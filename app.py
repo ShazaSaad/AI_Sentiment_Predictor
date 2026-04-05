@@ -108,7 +108,25 @@ companies = {
     "Amazon (AMZN)": "AMZN",
     "Alphabet (GOOG)": "GOOG",
     "Meta (META)": "META",
-    "Tesla (TSLA)": "TSLA"
+    "Tesla (TSLA)": "TSLA",
+    "Berkshire Hathaway (BRK-B)": "BRK-B",
+    "Eli Lilly (LLY)": "LLY",
+    "Broadcom (AVGO)": "AVGO",
+    "ASML (ASML)": "ASML",
+    "Taiwan Semiconductor (TSM)": "TSM",
+    "JPMorgan Chase (JPM)": "JPM",
+    "Visa (V)": "V",
+    "Mastercard (MA)": "MA",
+    "Walmart (WMT)": "WMT",
+    "ExxonMobil (XOM)": "XOM",
+    "Johnson & Johnson (JNJ)": "JNJ",
+    "Novo Nordisk (NVO)": "NVO",
+    "Procter & Gamble (PG)": "PG",
+    "Costco (COST)": "COST",
+    "Home Depot (HD)": "HD",
+    "Coca-Cola (KO)": "KO",
+    "PepsiCo (PEP)": "PEP",
+    "Toyota (TM)": "TM"
 }
 
 # ----------------------------
