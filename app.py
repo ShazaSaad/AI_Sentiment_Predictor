@@ -8,11 +8,94 @@ from PIL import Image
 # ----------------------------
 
 st.set_page_config(
-    page_title="AI Stock Forecasting Dashboard",
+    page_title="AI Stock Intelligence",
     layout="wide"
 )
 
-st.title("AI Stock Forecasting & Sentiment Analysis")
+# ----------------------------
+# LIGHT FINTECH UI (CUSTOM CSS)
+# ----------------------------
+
+st.markdown("""
+<style>
+
+/* Main background */
+.stApp {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    color: #111827;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #ffffff;
+    border-right: 1px solid #e5e7eb;
+}
+
+/* Cards */
+[data-testid="metric-container"],
+.custom-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    border: 1px solid #e5e7eb;
+}
+
+/* Headers */
+h1, h2, h3 {
+    color: #111827;
+}
+
+/* Divider */
+hr {
+    border: 1px solid #e5e7eb;
+}
+
+/* Buttons */
+.stButton>button {
+    border-radius: 10px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+}
+
+/* News Cards */
+.news-card {
+    background: white;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 12px;
+    transition: 0.2s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Tag badge */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #eef2ff;
+    color: #4338ca;
+    border-radius: 999px;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ----------------------------
+# HEADER (PRODUCT STYLE)
+# ----------------------------
+
+st.markdown("""
+# 📊 AI Stock Intelligence
+### Smarter Forecasting • Sentiment-Aware Insights • Decision Support
+""")
 
 # ----------------------------
 # COMPANY LIST
@@ -33,11 +116,8 @@ companies = {
 # ----------------------------
 
 RESULTS_PATH = "forecasting_pipeline/evaluation_results.csv"
-
 YEARLY_PLOTS = "forecasting_pipeline/plots/yearly"
-HISTORICAL_PLOTS = "forecasting_pipeline/plots/historical"
 FUTURE_PLOTS = "forecasting_pipeline/plots/future"
-
 SENTIMENT_PATH = "src/data/sentiment/daily_sentiment_scores.csv"
 NEWS_PATH = "src/data/raw_news/benzinga_news_raw.csv"
 
@@ -49,9 +129,6 @@ NEWS_PATH = "src/data/raw_news/benzinga_news_raw.csv"
 def load_metrics():
     return pd.read_csv(RESULTS_PATH)
 
-results_df = load_metrics()
-
-
 @st.cache_data
 def load_sentiment():
     if os.path.exists(SENTIMENT_PATH):
@@ -60,202 +137,199 @@ def load_sentiment():
         return df
     return pd.DataFrame()
 
-
 @st.cache_data
 def load_news():
     if os.path.exists(NEWS_PATH):
         return pd.read_csv(NEWS_PATH)
     return pd.DataFrame()
 
-
-sentiment_df = load_sentiment()
-news_df = load_news()
+with st.spinner("Loading intelligence modules..."):
+    results_df = load_metrics()
+    sentiment_df = load_sentiment()
+    news_df = load_news()
 
 # ----------------------------
 # SIDEBAR
 # ----------------------------
 
-st.sidebar.header("Select Company")
+st.sidebar.markdown("## 🔎 Controls")
 
 company_name = st.sidebar.selectbox(
-    "Company",
+    "Select Company",
     list(companies.keys())
 )
 
 ticker = companies[company_name]
 
-st.sidebar.write("Ticker:", ticker)
+st.sidebar.markdown(f"""
+<div class="custom-card">
+<b>Selected:</b><br>
+{company_name}<br><br>
+<b>Ticker:</b> {ticker}
+</div>
+""", unsafe_allow_html=True)
 
 # ----------------------------
-# METRICS FUNCTION
+# HEADER SECTION
+# ----------------------------
+
+st.markdown(f"## {company_name} ({ticker})")
+
+# ----------------------------
+# METRICS
 # ----------------------------
 
 def show_metrics():
+    df = results_df[results_df["ticker"] == ticker]
 
-    st.subheader("Model Evaluation")
-
-    company_results = results_df[
-        results_df["ticker"] == ticker
-    ]
-
-    if company_results.empty:
+    if df.empty:
         st.warning("No evaluation results found.")
         return
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric(
-        "Average R²",
-        round(company_results["R2"].mean(), 3)
-    )
-
-    col2.metric(
-        "Average RMSE",
-        round(company_results["RMSE"].mean(), 3)
-    )
-
-    col3.metric(
-        "Directional Accuracy",
-        round(company_results["Directional_Accuracy"].mean(), 3)
-    )
-
-    with st.expander("View Full Metrics Table"):
-        st.dataframe(company_results)
+    col1.metric("R² Score", f"{df['R2'].mean():.3f}")
+    col2.metric("RMSE", f"{df['RMSE'].mean():.3f}")
+    col3.metric("Directional Accuracy", f"{df['Directional_Accuracy'].mean():.2%}")
 
 # ----------------------------
-# FORECASTING PLOTS
+# FORECASTING
 # ----------------------------
+
+def show_future_plot():
+    file_path = f"{FUTURE_PLOTS}/{ticker}_forecast.png"
+
+    if os.path.exists(file_path):
+        st.image(file_path, width='stretch', caption="3-Month Forecast")
+    else:
+        st.info("Forecast not available.")
 
 def show_yearly_plots():
-
-    st.subheader("Yearly Forecasts (Jan–Mar)")
-
     if not os.path.exists(YEARLY_PLOTS):
-        st.warning("Yearly plots folder not found.")
+        st.warning("Yearly plots folder missing.")
         return
 
     files = sorted(os.listdir(YEARLY_PLOTS))
 
-    found = False
-
     for file in files:
         if file.startswith(ticker):
-
             img = Image.open(os.path.join(YEARLY_PLOTS, file))
-
-            st.image(img, caption=file)
-
-            found = True
-
-    if not found:
-        st.info("No yearly forecasts available.")
-
-
-def show_future_plot():
-
-    st.subheader("Next 3 Month Forecast")
-
-    file_path = f"{FUTURE_PLOTS}/{ticker}_forecast.png"
-
-    if os.path.exists(file_path):
-        st.image(file_path)
-    else:
-        st.info("Future forecast not available.")
+            st.image(img, caption=file, width='stretch')
 
 # ----------------------------
-# SENTIMENT FUNCTIONS
+# SENTIMENT
 # ----------------------------
 
-def show_sentiment_trend():
-
-    st.subheader("Market News Sentiment")
-
+def show_sentiment():
     if sentiment_df.empty:
-        st.warning("Sentiment data not found.")
+        st.warning("Sentiment data missing.")
         return
 
     df = sentiment_df.sort_values("date")
 
     st.line_chart(
-        df.set_index("date")["sentiment_score"]
+        df.set_index("date")["sentiment_score"],
+        height=300
     )
 
     col1, col2 = st.columns(2)
+    col1.metric("Average Sentiment", f"{df['sentiment_score'].mean():.3f}")
+    col2.metric("Latest Sentiment", f"{df['sentiment_score'].iloc[-1]:.3f}")
 
-    col1.metric(
-        "Average Sentiment",
-        round(df["sentiment_score"].mean(), 3)
-    )
+# ----------------------------
+# NEWS
+# ----------------------------
 
-    col2.metric(
-        "Latest Sentiment",
-        round(df["sentiment_score"].iloc[-1], 3)
-    )
-
-
-def show_recent_news():
-
-    st.subheader("Recent Financial News")
-
+def show_news():
     if news_df.empty:
         st.warning("No news data available.")
         return
 
-    recent = news_df.sort_values(
-        "created",
-        ascending=False
-    ).head(5)
+    recent = news_df.sort_values("created", ascending=False).head(5)
 
     for _, row in recent.iterrows():
-
-        st.markdown(f"**{row['title']}**")
-
-        st.caption(row["created"])
-
-        st.write(row["url"])
-
-        st.divider()
+        st.markdown(f"""
+<div class="news-card">
+<div class="badge">Market News</div>
+<h4>{row['title']}</h4>
+<p style="font-size:13px;color:gray;">{row['created']}</p>
+<a href="{row['url']}" target="_blank">Read full article →</a>
+</div>
+""", unsafe_allow_html=True)
 
 # ----------------------------
-# PAGE LAYOUT WITH TABS
+# TABS
 # ----------------------------
 
 tab1, tab2, tab3 = st.tabs([
     "Overview",
     "Forecasting",
-    "Sentiment Analysis"
+    "Sentiment"
 ])
 
 # ----------------------------
-# OVERVIEW TAB
+# OVERVIEW
 # ----------------------------
 
 with tab1:
 
-    st.header(company_name)
+    col1, col2 = st.columns([2, 1])
 
-    show_metrics()
+    with col1:
+        st.markdown("### 📈 Model Performance")
+        show_metrics()
+
+    with col2:
+        st.markdown("### 🧠 Insights")
+        st.markdown("""
+<div class="custom-card">
+• AI-driven predictions  
+• Uses sentiment + historical data  
+• Tracks directional accuracy  
+• Built for decision support  
+</div>
+""", unsafe_allow_html=True)
 
 # ----------------------------
-# FORECASTING TAB
+# FORECASTING
 # ----------------------------
 
 with tab2:
 
-    show_future_plot()
+    st.markdown("### 📊 Future Outlook")
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        show_future_plot()
+
+    with col2:
+        st.markdown("""
+<div class="custom-card">
+<b>Forecast Window:</b> 3 Months<br><br>
+<b>Signals Used:</b>
+<ul>
+<li>Historical price trends</li>
+<li>Market sentiment</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
 
     st.divider()
 
+    st.markdown("### 📅 Historical Forecasts")
     show_yearly_plots()
 
 # ----------------------------
-# SENTIMENT TAB
+# SENTIMENT
 # ----------------------------
 
 with tab3:
 
-    show_sentiment_trend()
+    st.markdown("### 🧠 Sentiment Trends")
+    show_sentiment()
 
     st.divider()
 
-    show_recent_news()
+    st.markdown("### 📰 Latest News")
+    show_news()
