@@ -126,18 +126,6 @@ def show_metrics():
 # FORECASTING PLOTS
 # ----------------------------
 
-def show_historical_plot():
-
-    st.subheader("Historical Performance + Prediction")
-
-    file_path = f"{HISTORICAL_PLOTS}/{ticker}_history.png"
-
-    if os.path.exists(file_path):
-        st.image(file_path)
-    else:
-        st.info("Historical plot not available.")
-
-
 def show_yearly_plots():
 
     st.subheader("Yearly Forecasts (Jan–Mar)")
@@ -167,7 +155,7 @@ def show_future_plot():
 
     st.subheader("Next 3 Month Forecast")
 
-    file_path = f"{FUTURE_PLOTS}/{ticker}_future.png"
+    file_path = f"{FUTURE_PLOTS}/{ticker}_forecast.png"
 
     if os.path.exists(file_path):
         st.image(file_path)
@@ -254,15 +242,11 @@ with tab1:
 
 with tab2:
 
-    show_historical_plot()
+    show_future_plot()
 
     st.divider()
 
     show_yearly_plots()
-
-    st.divider()
-
-    show_future_plot()
 
 # ----------------------------
 # SENTIMENT TAB
